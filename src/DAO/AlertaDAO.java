@@ -1,54 +1,72 @@
 package DAO;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import Servelet.Conexao;
+import java.sql.*;
+import model.Alerta;
+import model.Conexao;
 
 public class AlertaDAO {
 
-    public void inserir(Integer id, Integer idProduto, String tipoAlerta, String dataCriacao, String status) {
-        String sql = "INSERT INTO alerta (id, id_produto, tipo_alerta, data_criacao, status) VALUES (?, ?, ?, ?, ?)";
+    public void create(Alerta alerta) {
+        String sql = "INSERT INTO alerta (id_produto, tipo_alerta, data_criacao, status) VALUES (?, ?, ?, ?)";
+        Conexao conexao = new Conexao();
+        Connection conn = conexao.conectar();
 
         try {
-            Connection conn = Conexao.criarConexao();
             PreparedStatement pstmt = conn.prepareStatement(sql);
 
-            pstmt.setInt(1, id);
-            pstmt.setInt(2, idProduto);
-            pstmt.setString(3, tipoAlerta);
-            pstmt.setString(4, dataCriacao);
-            pstmt.setString(5, status);
-
+            pstmt.setInt(1, alerta.getIdProduto());
+            pstmt.setString(2, alerta.getTipoAlerta());
+            pstmt.setString(3, alerta.getDataCriacao());
+            pstmt.setString(4, alerta.getStatus());
             pstmt.executeUpdate();
-            pstmt.close();
-            conn.close();
-
             System.out.println("Alerta inserido com sucesso!");
         } catch (SQLException sqle) {
             sqle.printStackTrace();
         }
+        conexao.desconectar(conn);
     }
-    public void alterar(int id, double estoqueMinimo){
+    public ResultSet read() {
         Conexao conexao = new Conexao();
-        Connection conn = conexao.criarConexao();
+        Connection conn = conexao.conectar();
+        ResultSet rset = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement("UPDATE DEPT SER DNAME = ? WHERE DEPTNO = ?");
+            Statement stmt = conn.createStatement();
+            rset = stmt.executeQuery("SELECT * FROM Alerta");
+
+            conexao.desconectar(conn);
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+        }
+        conexao.desconectar(conn);
+        return rset;
+    }
+    public void update(Alerta alerta){
+        Conexao conexao = new Conexao();
+        Connection conn = conexao.conectar();
+        String sql ="UPDATE Produto SET idProduto = ?, tipoAlerta = ?, dataCriacao = ?, status = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1,alerta.getIdProduto());
+            pstmt.setString(2, alerta.getTipoAlerta());
+            pstmt.setString(3,alerta.getDataCriacao());
+            pstmt.setString(4, alerta.getStatus());
         }catch (SQLException sqle){
             sqle.printStackTrace();
         }
+        conexao.desconectar(conn);
     }
-    public void remover(int id){
+    public void delete(int id){
+        Conexao conexao = new Conexao();
+        Connection conn = conexao.conectar();
+        String sql = "DELETE FROM alerta WHERE id = ?";
         try{
-            Conexao conexao = new Conexao();
-            Connection conn = conexao.criarConexao();
-            PreparedStatement pstmt = conn.prepareStatement("DELETE FROM DEPT WHERE DEPTNO = ?");
-
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1,id);
             pstmt.execute();
-            conexao.desconectar(conn);
         }catch (SQLException sqle){
             sqle.printStackTrace();
         }
+        conexao.desconectar(conn);
     }
+
 }
